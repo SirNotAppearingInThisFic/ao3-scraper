@@ -8,20 +8,23 @@ defmodule Ao3 do
 
   @type rated_story :: {StoryId.t(), integer}
 
+  @page_re ~r/\?page=(\d+)/
+
   @spec get_bookmarks(String.t()) :: [rated_story]
   def get_bookmarks(user) do
     user
     |> UserId.from_string()
     |> fetch_bookmarked()
     |> Enum.take(1)
-    |> fetch_and_concat(&fetch_bookmarkers/1)
+    |> fetch_and_concat(&fetch_all_bookmarkers/1)
     |> Enum.uniq()
     |> fetch_and_concat(&fetch_bookmarked/1)
     |> Enum.group_by(&identity/1)
     |> Enum.map(fn {user, users} ->
       {user, Enum.count(users)}
     end)
-    |> Enum.sort_by(&(elem(&1, 1)))
+    |> Enum.sort_by(&elem(&1, 1), &>=/2)
+    |> Enum.take(5)
   end
 
   @spec fetch_bookmarked(UserId.t()) :: [StoryId.t()]
@@ -33,14 +36,52 @@ defmodule Ao3 do
     |> find_story_ids()
   end
 
-  @spec fetch_bookmarkers(StoryId.t()) :: [UserId.t()]
-  def fetch_bookmarkers(%StoryId{id: story}) do
+  @spec fetch_all_bookmarkers(StoryId.t()) :: [UserId.t()]
+  @spec fetch_all_bookmarkers(StoryId.t(), String.t(), [[UserId.t()]]) :: [UserId.t()]
+  def fetch_all_bookmarkers(story) do
     story
-    |> story_bookmarks_url()
-    |> fetch_body()
-    |> Floki.find(".user .byline a")
-    |> Floki.attribute("href")
-    |> Enum.map(&user_id_of_user_url/1)
+    |> fetch_all_bookmarkers("1", [])
+  end
+
+  def fetch_all_bookmarkers(story, page, acc) do
+    case fetch_bookmarkers(story, page) do
+      {:done, users} ->
+        [users | acc]
+        |> Enum.concat()
+
+      {page, users} ->
+        fetch_all_bookmarkers(story, page, [users | acc])
+    end
+  end
+
+  @spec fetch_bookmarkers(StoryId.t(), String.t) :: {:done | String.t(), [UserId.t()]}
+  def fetch_bookmarkers(%StoryId{id: story}, page) do
+    body =
+      story
+      |> story_bookmarks_url(page)
+      |> fetch_body()
+
+    users =
+      body
+      |> Floki.find(".user .byline a")
+      |> Floki.attribute("href")
+      |> Enum.map(&user_id_of_user_url/1)
+
+    next_page =
+      case body
+           |> Floki.find(".pagination .next a")
+           |> List.first() do
+        nil ->
+          :done
+
+        html ->
+          html
+          |> Floki.attribute("href")
+          |> List.first()
+          |> next_page_of_next_url()
+      end
+
+    {next_page, users}
   end
 
   @spec find_story_ids(html) :: [StoryId.t()]
@@ -51,45 +92,50 @@ defmodule Ao3 do
     |> Enum.map(&story_id_of_story_url/1)
   end
 
-  defp user_id_of_user_url(url) do
+  def user_id_of_user_url(url) do
     url
     |> String.split("/")
     |> Enum.at(2)
     |> UserId.from_string()
   end
 
-  defp story_id_of_story_url(url) do
+  def story_id_of_story_url(url) do
     url
     |> String.split("/")
     |> Enum.at(2)
     |> StoryId.from_string()
   end
 
-  defp fetch_body(url) do
+  def next_page_of_next_url(url) do
+    [_, page_number] = Regex.run(@page_re, url)
+    page_number
+  end
+
+  def fetch_body(url) do
     url
     |> HTTPoison.get!()
     |> Map.get(:body)
   end
 
-  defp user_bookmarks_url(user_id) do
+  def user_bookmarks_url(user_id) do
     "#{@base_url}/users/#{user_id}/bookmarks"
   end
 
-  defp story_bookmarks_url(story_id) do
-    "#{@base_url}/works/#{story_id}/bookmarks"
+  def story_bookmarks_url(story_id, page) do
+    "#{@base_url}/works/#{story_id}/bookmarks?page=#{page}"
   end
 
-  defp user_url(user_id) do
+  def user_url(user_id) do
     "#{@base_url}/users/#{user_id}/pseuds/#{user_id}"
   end
 
   @spec fetch_and_concat(Enum.t(), any) :: [any]
-  defp fetch_and_concat(enum, f) do
+  def fetch_and_concat(enum, f) do
     enum
     |> Task.async_stream(f)
     |> Enum.map(fn {:ok, data} -> data end)
     |> Enum.concat()
   end
 
-  defp identity(x), do: x
+  def identity(x), do: x
 end
