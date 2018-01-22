@@ -3,18 +3,22 @@ defmodule Ao3.Story do
   alias Ao3.Id
 
   @type t :: %Story{
-          url: String.t(),
+          id: String.t(),
           name: String.t(),
           author: Id.t(),
           fandoms: [String.t],
           tags: [String.t],
-          words: integer,
+          words: String.t,
           chapters: String.t(),
-          comments: integer,
-          kudos: integer,
-          bookmarks: integer,
-          hits: integer
+          comments: String.t,
+          kudos: String.t,
+          bookmarks: String.t,
+          hits: String.t
         }
 
-  defstruct [:url, :name, :author, :fandoms, :tags, :words, :chapters, :comments, :kudos, :bookmarks, :hits]
+  defstruct [:id, :name, :author, :fandoms, :tags, :words, :chapters, :comments, :kudos, :bookmarks, :hits]
+
+  def to_string(%Story{id: id}) do
+    id
+  end
 end
