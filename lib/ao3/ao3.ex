@@ -13,11 +13,15 @@ defmodule Ao3 do
     user
     |> UserId.from_string()
     |> fetch_bookmarked()
+    |> Enum.take(1)
     |> fetch_and_concat(&fetch_bookmarkers/1)
     |> Enum.uniq()
     |> fetch_and_concat(&fetch_bookmarked/1)
     |> Enum.group_by(&identity/1)
-    |> Enum.map(&Enum.count/1)
+    |> Enum.map(fn {user, users} ->
+      {user, Enum.count(users)}
+    end)
+    |> Enum.sort_by(&(elem(&1, 1)))
   end
 
   @spec fetch_bookmarked(UserId.t()) :: [StoryId.t()]
