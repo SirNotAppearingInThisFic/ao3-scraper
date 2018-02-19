@@ -22,7 +22,9 @@ defmodule Ao3.MixProject do
     [
       {:httpoison, "~> 1.0"},
       {:floki, "~> 0.19.2"},
-      {:dialyxir, "~> 0.5", only: [:dev], runtime: false}
+      {:dialyxir, "~> 0.5", only: [:dev], runtime: false},
+      {:postgrex, ">= 0.0.0"},
+      {:ecto, "~> 2.2.8"}
     ]
   end
 end
