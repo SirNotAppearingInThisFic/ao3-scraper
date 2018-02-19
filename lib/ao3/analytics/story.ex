@@ -1,10 +1,11 @@
-defmodule Ao3.Story do
-  alias __MODULE__
-  alias Ao3.Id
-
-  alias Ao3.User
-
+defmodule Ao3.Analytics.Story do
   use Ecto.Schema
+
+  alias __MODULE__
+
+  alias Ecto.Changeset
+  alias Ao3.Analytics.User
+  alias Ao3.Scraper
 
   @type t :: %Story{
           id: integer | nil,
@@ -39,17 +40,9 @@ defmodule Ao3.Story do
     field(:hits, :integer)
   end
 
-  def to_string(%Story{id: id}) do
-    id
-  end
-
-  @spec from_string(Id.t()) :: t
-  def from_string(id) do
-    %Story{id: id}
-  end
-
-  @spec to_id(t) :: Id.t()
-  def to_id(%Story{id: id}) do
-    id
+  @spec changeset(t, Scraper.story()) :: Changeset.t()
+  def changeset(struct, params \\ %{}) do
+    struct
+    |> cast(params, [:id, :name, :words, :chapters, :comments, :kudos, :bookmarks, :hits])
   end
 end

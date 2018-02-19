@@ -1,20 +1,19 @@
 defmodule Ao3.Scraper.UserId do
   alias __MODULE__
-  alias Ao3.Scraper.Id
 
   @type t :: %UserId {
-    id: Id.t
+    id: String.t
   }
 
   defstruct [:id]
 
-  @spec from_string(Id.t) :: t
-  def from_string(id) do
-    %UserId{id: id}
+  @spec from_string(String.t) :: t
+  def from_string(username) do
+    %UserId{id: username}
   end
 
-  @spec to_id(t) :: Id.t()
-  def to_id(%UserId{id: id}) do
-    id
+  @spec to_username(t) :: Id.t()
+  def to_username(%UserId{id: username}) do
+    username
   end
 end

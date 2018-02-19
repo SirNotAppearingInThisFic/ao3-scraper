@@ -17,22 +17,30 @@ defmodule Ao3.Scraper.Bookmarked do
     |> Enum.concat()
   end
 
+  @spec fetch_story_data(StoryId.t()) :: [Story.t()]
+  def fetch_story_data(story) do
+    story
+    |> fetch_bookmarked_page("1")
+    |> Floki.find(".work.blurb.group")
+    |> find_story_data()
+  end
+
   @spec fetch_bookmarked_page(UserId.t(), String.t()) :: html()
-  def fetch_bookmarked_page(%UserId{id: user}, page) do
+  defp fetch_bookmarked_page(%UserId{id: user}, page) do
     user
     |> Urls.user_bookmarks(page)
     |> Utils.fetch_body()
   end
 
   @spec parse_bookmarked_stories(html) :: [Story.t()]
-  def parse_bookmarked_stories(body) do
+  defp parse_bookmarked_stories(body) do
     body
     |> Floki.find(".bookmark.blurb.group")
     |> Enum.map(&find_story_data/1)
   end
 
   @spec find_story_data(html) :: Story.t()
-  def find_story_data(html) do
+  defp find_story_data(html) do
     %Story{
       id: find_story_ids(html) |> List.first(),
       name: html |> find_header_title() |> Floki.text(),

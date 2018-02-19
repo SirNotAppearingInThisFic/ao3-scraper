@@ -11,7 +11,12 @@ defmodule Ao3.Scraper.StoryId do
   @spec from_string(Id.t()) :: t
   def from_string(id) do
     {n, ""} = Integer.parse(id)
-    %StoryId{id: n}
+    from_int(n)
+  end
+
+  @spec from_int(integer) :: t
+  def from_int(id) do
+    %StoryId{id: id}
   end
 
   @spec to_id(t) :: Id.t()
