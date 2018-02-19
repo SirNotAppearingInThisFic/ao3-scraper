@@ -1,6 +1,6 @@
-defmodule Ao3.UserId do
+defmodule Ao3.Scraper.UserId do
   alias __MODULE__
-  alias Ao3.Id
+  alias Ao3.Scraper.Id
 
   @type t :: %UserId {
     id: Id.t

@@ -1,6 +1,6 @@
-defmodule Ao3.StoryId do
+defmodule Ao3.Scraper.StoryId do
   alias __MODULE__
-  alias Ao3.Id
+  alias Ao3.Scraper.Id
 
   @type t :: %StoryId{
           id: Id.t()
@@ -10,7 +10,8 @@ defmodule Ao3.StoryId do
 
   @spec from_string(Id.t()) :: t
   def from_string(id) do
-    %StoryId{id: id}
+    {n, ""} = Integer.parse(id)
+    %StoryId{id: n}
   end
 
   @spec to_id(t) :: Id.t()
