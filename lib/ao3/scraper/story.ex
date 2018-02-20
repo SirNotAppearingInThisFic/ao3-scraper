@@ -7,12 +7,12 @@ defmodule Ao3.Scraper.Story do
     name: String.t,
     fandoms: [String.t],
     tags: [String.t],
-    words: integer,
-    chapters: integer,
-    comments: integer,
-    kudos: integer,
-    bookmarks: integer,
-    hits: integer
+    word_count: integer,
+    chapter_count: integer,
+    comment_count: integer,
+    kudos_count: integer,
+    bookmark_count: integer,
+    hit_count: integer
   }
 
   defstruct [:id, :author, :name, :fandoms, :tags, :words, :chapters, :comments, :kudos, :bookmarks, :hits]

@@ -24,7 +24,9 @@ defmodule Ao3.MixProject do
       {:floki, "~> 0.19.2"},
       {:dialyxir, "~> 0.5", only: [:dev], runtime: false},
       {:postgrex, ">= 0.0.0"},
-      {:ecto, "~> 2.2.8"}
+      {:ecto, "~> 2.2.8"},
+      {:timex, "~> 3.0"},
+      {:timex_ecto, "~> 3.0"}
     ]
   end
 end

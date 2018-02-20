@@ -2,19 +2,26 @@ defmodule Ao3.Repo.Migrations.AddInitTables do
   use Ecto.Migration
 
   def change do
-    create table(:stories) do
-      add :name
-      add :words, :integer
-      add :chapters, :integer
-      add :comments, :integer
-      add :kudos, :integer
-      add :bookmarks, :integer
-      add :hits, :integer
+    create table(:stories, primary_key: false) do
+      add :id, :integer, primary_key: true
+      add :author_name, :string
+      add :tags, {:array, :string}
+      add :fandoms, {:array, :string}
+      add :name, :string
+      add :word_count, :integer
+      add :chapter_count, :integer
+      add :comment_count, :integer
+      add :kudos_count, :integer
+      add :bookmark_count, :integer
+      add :hit_count, :integer
+      add :bookmarks_fetched_at, :utc_datetime
 
       timestamps()
     end
 
-    create table(:users) do
+    create table(:users, primary_key: false) do
+      add :username, :string, primary_key: true
+      add :bookmarks_fetched_at, :utc_datetime
       timestamps()
     end
 
