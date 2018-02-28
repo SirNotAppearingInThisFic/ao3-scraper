@@ -12,7 +12,7 @@ defmodule Ao3.Scraper.UserId do
     %UserId{id: username}
   end
 
-  @spec to_username(t) :: Id.t()
+  @spec to_username(t) :: String.t()
   def to_username(%UserId{id: username}) do
     username
   end

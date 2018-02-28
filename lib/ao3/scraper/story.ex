@@ -3,7 +3,7 @@ defmodule Ao3.Scraper.Story do
 
   @type t :: %Story{
     id: integer,
-    author: UserId.t,
+    author_name: String.t,
     name: String.t,
     fandoms: [String.t],
     tags: [String.t],
@@ -15,5 +15,5 @@ defmodule Ao3.Scraper.Story do
     hit_count: integer
   }
 
-  defstruct [:id, :author, :name, :fandoms, :tags, :words, :chapters, :comments, :kudos, :bookmarks, :hits]
+  defstruct [:id, :author_name, :name, :fandoms, :tags, :word_count, :chapter_count, :comment_count, :kudos_count, :bookmark_count, :hit_count]
 end

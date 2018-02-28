@@ -1,5 +1,6 @@
 defmodule Ao3.Analytics.Story do
   use Ecto.Schema
+  import Ecto.Changeset
 
   alias __MODULE__
 
@@ -8,10 +9,10 @@ defmodule Ao3.Analytics.Story do
   alias Ao3.Scraper
 
   @type t :: %Story{
-          id: integer,
-          author_name: String.t,
-          author: User.t(),
-          bookmarkers: [User.t()],
+          id: integer | nil,
+          author_name: String.t() | nil,
+          author: User.t() | not_loaded,
+          bookmarkers: [User.t()] | not_loaded,
           name: String.t(),
           fandoms: [String.t()],
           tags: [String.t()],
@@ -21,33 +22,62 @@ defmodule Ao3.Analytics.Story do
           kudos_count: integer,
           bookmark_count: integer,
           hit_count: integer,
-          bookmarks_fetched_at: Timex.datetime()
+          bookmarks_fetched_at: Timex.Types.datetime() | nil,
+          inserted_at: Timex.Types.datetime() | nil,
+          updated_at: Timex.Types.datetime() | nil
         }
 
+  @typep not_loaded :: %Ecto.Association.NotLoaded{}
+
   @primary_key {:id, :integer, []}
-  @derive {Phoenix.Param, key: :id}
   @timestamps_opts [type: Timex.Ecto.DateTime]
-  schema "story" do
-    belongs_to(:author, User, foreign_key: :author_name)
+  schema "stories" do
+    belongs_to(:author, User, foreign_key: :author_name, references: :username, type: :string)
 
-    many_to_many(:bookmarkers, User, join_through: "bookmarks")
+    many_to_many(
+      :bookmarkers,
+      Story,
+      join_through: "bookmarks",
+      join_keys: [story_id: :id, username: :username]
+    )
 
-    field(:tags, {:array, :string})
-    field(:fandoms, {:array, :string})
+    field(:tags, {:array, :string}, default: [])
+    field(:fandoms, {:array, :string}, default: [])
 
-    field(:name)
-    field(:word_count, :integer)
-    field(:chapter_count, :integer)
-    field(:comment_count, :integer)
-    field(:kudos_count, :integer)
-    field(:bookmark_count, :integer)
-    field(:hit_count, :integer)
+    field(:name, :string, default: "")
+    field(:word_count, :integer, default: 0)
+    field(:chapter_count, :integer, default: 0)
+    field(:comment_count, :integer, default: 0)
+    field(:kudos_count, :integer, default: 0)
+    field(:bookmark_count, :integer, default: 0)
+    field(:hit_count, :integer, default: 0)
     field(:bookmarks_fetched_at, Timex.Ecto.DateTime)
+
+    timestamps()
   end
 
   @spec changeset(t, Scraper.story()) :: Changeset.t()
-  def changeset(struct, params \\ %{}) do
+  def changeset(struct, params) do
     struct
-    |> cast(params, [:id, :name, :words, :chapters, :comments, :kudos, :bookmarks, :hits])
+    |> cast(params |> Map.from_struct(), [
+      :id,
+      :author_name,
+      :name,
+      :tags,
+      :fandoms,
+      :word_count,
+      :chapter_count,
+      :comment_count,
+      :kudos_count,
+      :bookmark_count,
+      :hit_count
+    ])
+  end
+
+  @spec bookmarks_changeset(t, Scraper.story()) :: Changeset.t()
+  def bookmarks_changeset(struct, params) do
+    struct
+    |> changeset(params)
+    |> put_change(:bookmarks_fetched_at, Timex.now())
   end
 end

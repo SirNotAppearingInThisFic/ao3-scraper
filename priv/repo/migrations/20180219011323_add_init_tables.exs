@@ -26,7 +26,7 @@ defmodule Ao3.Repo.Migrations.AddInitTables do
     end
 
     create table(:bookmarks) do
-      add :user_id, references(:users)
+      add :username, references(:users, column: :username, type: :string)
       add :story_id, references(:stories)
     end
   end

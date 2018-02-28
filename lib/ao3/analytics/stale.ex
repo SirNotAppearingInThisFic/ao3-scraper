@@ -3,7 +3,7 @@ defmodule Ao3.Analytics.Stale do
 
   @stale_days 7
 
-  @spec stale?(Timex.datetime()) :: boolean
+  @spec stale?(Timex.Types.datetime()) :: boolean
   def stale?(date) do
     Timex.before?(date, stale_date())
   end

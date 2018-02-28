@@ -17,9 +17,9 @@ defmodule Ao3.Scraper do
     |> Enum.map(&UserId.to_username/1)
   end
 
-  @spec fetch_bookmarked_story_data(UserId.t()) :: [Story.t()]
-  def fetch_bookmarked_story_data(user) do
-    user
+  @spec fetch_bookmarked_story_data(String.t) :: [Story.t()]
+  def fetch_bookmarked_story_data(username) do
+    username
     |> UserId.from_string()
     |> Bookmarked.fetch_bookmarked_story_data()
   end
@@ -28,6 +28,6 @@ defmodule Ao3.Scraper do
   def fetch_story_data(story) do
     story
     |> StoryId.from_int()
-    |> Bookmarked.fetch_story_data()
+    |> Bookmarkers.fetch_story_data()
   end
 end
