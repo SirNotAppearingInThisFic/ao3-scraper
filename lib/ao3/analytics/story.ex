@@ -30,7 +30,6 @@ defmodule Ao3.Analytics.Story do
   @typep not_loaded :: %Ecto.Association.NotLoaded{}
 
   @primary_key {:id, :integer, []}
-  @timestamps_opts [type: Timex.Ecto.DateTime]
   schema "stories" do
     belongs_to(:author, User, foreign_key: :author_name, references: :username, type: :string)
 

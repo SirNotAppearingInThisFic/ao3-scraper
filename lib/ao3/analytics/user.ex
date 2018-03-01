@@ -17,7 +17,6 @@ defmodule Ao3.Analytics.User do
   @typep not_loaded :: %Ecto.Association.NotLoaded{}
 
   @primary_key {:username, :string, []}
-  @timestamps_opts [type: Timex.Ecto.DateTime]
   schema "users" do
     many_to_many(
       :bookmarks,
