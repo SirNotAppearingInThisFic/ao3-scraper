@@ -11,6 +11,7 @@ defmodule Ao3.Analytics do
   @spec populate_bookmarkers_bookmarks(integer) :: :ok
   def populate_bookmarkers_bookmarks(story_id) do
     with story <- Repo.get(Story, story_id),
+         # TODO: This doesn't seem to be working
          true <- FetcherChecker.fetch_story_bookmarkers?(story),
          story_data <- Scraper.fetch_story_data(story_id),
          _ <- IO.inspect(story_data),
@@ -24,10 +25,11 @@ defmodule Ao3.Analytics do
     end
   end
 
-  @spec fetch_bookmarker_bookmarks([String.t()]) :: any
-  defp fetch_bookmarker_bookmarks(usernames) do
+  @spec fetch_bookmarker_bookmarks([String.t()]) :: [any]
+  def fetch_bookmarker_bookmarks(usernames) do
     usernames
     |> Task.async_stream(&fetch_one_bookmarkers_bookmarks/1)
+    |> Enum.to_list()
   end
 
   @spec fetch_one_bookmarkers_bookmarks(String.t) :: any

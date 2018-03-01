@@ -13,6 +13,8 @@ defmodule Ao3.Scraper.StoryPage do
   @spec find_story_data(html) :: Story.t()
   def find_story_data(html) do
     %Story{
+      # TODO: Handle series (see https://archiveofourown.org/series/927273/bookmarks)
+      # TODO: Probably add a type field
       id: find_story_id(html),
       author_name: html |> find_header_author() |> Floki.text(),
       name: html |> find_header_title() |> Floki.text(),
@@ -46,10 +48,10 @@ defmodule Ao3.Scraper.StoryPage do
 
   @spec parse_chapters(String.t()) :: integer
   defp parse_chapters(text) do
-    @chapter_regex
-    |> Regex.run(text)
-    |> List.last()
-    |> to_int()
+    case Regex.run(@chapter_regex, text) do
+      [_, chapters] -> to_int(chapters)
+      _ -> 0
+    end
   end
 
   defp find_header_author(html) do
