@@ -1,20 +1,24 @@
 defmodule Ao3.Scraper.Urls do
-  @base "https://archiveofourown.org"
+  alias Ao3.Scraper.StoryId
+  alias Ao3.Scraper.UserId
 
   @type t :: String.t()
 
-  @spec user_bookmarks(String.t(), String.t()) :: t
-  def user_bookmarks(user_id, page) do
-    "#{@base}/users/#{user_id}/bookmarks?page=#{page}"
+  @base "https://archiveofourown.org"
+
+  @spec user_bookmarks(UserId.t(), String.t()) :: t
+  def user_bookmarks(%UserId{id: id}, page) do
+    "#{@base}/users/#{id}/bookmarks?page=#{page}"
   end
 
-  @spec story_bookmarks(integer, String.t()) :: t
-  def story_bookmarks(story_id, page) do
-    "#{@base}/works/#{story_id}/bookmarks?page=#{page}"
+  @spec story_bookmarks(StoryId.t(), String.t()) :: t
+  def story_bookmarks(story_id = %StoryId{}, page) do
+    "#{story(story_id)}/bookmarks?page=#{page}"
   end
 
-  def story(story_id) do
-    "#{@base}/works/#{story_id}"
+  @spec story(StoryId.t()) :: t
+  def story(%StoryId{id: id, type: type}) do
+    "#{@base}/#{type}/#{id}"
   end
 
   def user(user_id) do

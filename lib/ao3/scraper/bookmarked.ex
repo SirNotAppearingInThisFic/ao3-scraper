@@ -16,7 +16,7 @@ defmodule Ao3.Scraper.Bookmarked do
   end
 
   @spec fetch_bookmarked_page(UserId.t(), String.t()) :: html()
-  defp fetch_bookmarked_page(%UserId{id: user}, page) do
+  defp fetch_bookmarked_page(user = %UserId{}, page) do
     user
     |> Urls.user_bookmarks(page)
     |> Utils.fetch_body()

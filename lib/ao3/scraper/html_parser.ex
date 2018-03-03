@@ -17,13 +17,16 @@ defmodule Ao3.Scraper.HtmlParser do
     |> to_int()
   end
 
+  def to_int(nil), do: 0
+
   def to_int(""), do: 0
 
   def to_int(s) do
-    {s, ""} = 
-    s
-    |> String.replace(",", "")
-    |> Integer.parse()
+    {s, ""} =
+      s
+      |> String.replace(",", "")
+      |> Integer.parse()
+
     s
   end
 end

@@ -7,5 +7,4 @@ defmodule Ao3.Scraper.Utils do
     |> HTTPoison.get!()
     |> Map.get(:body)
   end
-
 end

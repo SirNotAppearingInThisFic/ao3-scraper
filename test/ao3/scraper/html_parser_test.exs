@@ -5,7 +5,6 @@ defmodule Ao3.Scraper.HtmlParserTest do
 
   doctest Ao3.Scraper.HtmlParser
 
-
   test "find_dd" do
     html = """
       <dl>
@@ -13,6 +12,7 @@ defmodule Ao3.Scraper.HtmlParserTest do
         <dd class="yep">Yep</dd>
       </dl>
     """
+
     assert HtmlParser.find_dd(html, "yep") == "Yep"
   end
 
@@ -23,6 +23,7 @@ defmodule Ao3.Scraper.HtmlParserTest do
         <dd class="yep">15</dd>
       </dl>
     """
+
     assert HtmlParser.int_dd(html, "yep") == 15
   end
 

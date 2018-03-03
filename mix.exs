@@ -26,6 +26,7 @@ defmodule Ao3.MixProject do
       {:dialyxir, "~> 0.5", only: [:dev], runtime: false},
       {:postgrex, ">= 0.0.0"},
       {:ecto, "~> 2.2.8"},
+      {:ecto_enum, "~> 1.0"},
       {:timex, "~> 3.0"},
       {:timex_ecto, "~> 3.0"}
     ]

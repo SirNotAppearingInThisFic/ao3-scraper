@@ -12,12 +12,15 @@ defmodule Ao3.Scraper.StoryPage do
 
   @spec find_story_data(html) :: Story.t()
   def find_story_data(html) do
+    {type, link_html} = find_story_link(html)
+
     %Story{
       # TODO: Handle series (see https://archiveofourown.org/series/927273/bookmarks)
       # TODO: Probably add a type field
-      id: find_story_id(html),
+      id: link_html |> find_story_id(),
       author_name: html |> find_header_author() |> Floki.text(),
-      name: html |> find_header_title() |> Floki.text(),
+      type: type,
+      name: link_html |> Floki.text(),
       fandoms: [],
       tags: [],
       word_count: int_dd(html, "words"),
@@ -29,10 +32,20 @@ defmodule Ao3.Scraper.StoryPage do
     }
   end
 
+  @spec find_story_link(html) :: {Story.story_type(), html}
+  defp find_story_link(html) do
+    work_link = find_work_link(html)
+    series_link = find_series_link(html)
+
+    cond do
+      work_link -> {:work, work_link}
+      find_series_link(html) -> {:series, series_link}
+    end
+  end
+
   @spec find_story_id(html) :: integer
   defp find_story_id(html) do
     html
-    |> find_header_title()
     |> Floki.attribute("href")
     |> List.first()
     |> story_id_of_story_url()
@@ -58,8 +71,13 @@ defmodule Ao3.Scraper.StoryPage do
     Floki.find(html, ".header .heading a[rel=\"author\"]")
   end
 
-  defp find_header_title(html) do
+  defp find_work_link(html) do
     html
     |> Floki.find(".header .heading a[href*=\"/works/\"]")
+  end
+
+  defp find_series_link(html) do
+    html
+    |> Floki.find(".header .heading a[href*=\"/series/\"]")
   end
 end

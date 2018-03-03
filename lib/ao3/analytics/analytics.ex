@@ -8,15 +8,16 @@ defmodule Ao3.Analytics do
   alias Ao3.Analytics.FetcherChecker
   alias Ao3.Analytics.CreateOrUpdate
 
-  @spec populate_bookmarkers_bookmarks(integer) :: :ok
-  def populate_bookmarkers_bookmarks(story_id) do
-    with story <- Repo.get(Story, story_id),
+  @type story_type :: Story.story_type()
+
+  @spec populate_bookmarkers_bookmarks(integer, story_type) :: :ok | any
+  def populate_bookmarkers_bookmarks(story_id, story_type) do
+    with story <- Repo.get_by(Story, story_id: story_id, type: story_type),
          # TODO: This doesn't seem to be working
          true <- FetcherChecker.fetch_story_bookmarkers?(story),
-         story_data <- Scraper.fetch_story_data(story_id),
-         _ <- IO.inspect(story_data),
+         story_data <- Scraper.fetch_story_data(story_id, story_type),
          {:ok, _story} <- CreateOrUpdate.create_or_update_story_bookmarks(story, story_data),
-         usernames <- Scraper.fetch_story_bookmarkers(story_id),
+         usernames <- Scraper.fetch_story_bookmarkers(story_id, story_type),
          _ <- fetch_bookmarker_bookmarks(usernames) do
       :ok
     else
@@ -32,20 +33,20 @@ defmodule Ao3.Analytics do
     |> Enum.to_list()
   end
 
-  @spec fetch_one_bookmarkers_bookmarks(String.t) :: any
+  @spec fetch_one_bookmarkers_bookmarks(String.t()) :: :ok | any
   defp fetch_one_bookmarkers_bookmarks(username) do
     with user <- Repo.get(User, username),
          true <- FetcherChecker.fetch_user_bookmarks?(user),
-         {:ok, _user} <- CreateOrUpdate.create_or_update_user_bookmarks(user, username),
-         _ <- delete_all_bookmark_joins(username)
-         do
+         {:ok, user} <- CreateOrUpdate.create_or_update_user_bookmarks(user, username),
+         _ <- delete_all_bookmark_joins(username) do
       username
       |> Scraper.fetch_bookmarked_story_data()
       |> Enum.map(fn story_data ->
         story = create_or_update_story_data(story_data)
-        %{username: username, story_id: story.id}
+        %{username: user.username, story_id: story.id}
       end)
       |> insert_all_bookmark_joins()
+
       :ok
     else
       %User{} -> :ok

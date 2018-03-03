@@ -4,12 +4,17 @@ defmodule Ao3.Analytics.Story do
 
   alias __MODULE__
 
+  @type story_type :: :work | :status
+
   alias Ecto.Changeset
+  alias Ao3.Analytics.StoryTypeEnum
   alias Ao3.Analytics.User
   alias Ao3.Scraper
 
   @type t :: %Story{
           id: integer | nil,
+          story_id: integer | nil,
+          type: story_type,
           author_name: String.t() | nil,
           author: User.t() | not_loaded,
           bookmarkers: [User.t()] | not_loaded,
@@ -29,7 +34,6 @@ defmodule Ao3.Analytics.Story do
 
   @typep not_loaded :: %Ecto.Association.NotLoaded{}
 
-  @primary_key {:id, :integer, []}
   schema "stories" do
     belongs_to(:author, User, foreign_key: :author_name, references: :username, type: :string)
 
@@ -39,6 +43,9 @@ defmodule Ao3.Analytics.Story do
       join_through: "bookmarks",
       join_keys: [story_id: :id, username: :username]
     )
+
+    field(:story_id, :integer)
+    field(:type, StoryTypeEnum, default: :work)
 
     field(:tags, {:array, :string}, default: [])
     field(:fandoms, {:array, :string}, default: [])
@@ -59,7 +66,8 @@ defmodule Ao3.Analytics.Story do
   def changeset(struct, params) do
     struct
     |> cast(params |> Map.from_struct(), [
-      :id,
+      :story_id,
+      :type,
       :author_name,
       :name,
       :tags,

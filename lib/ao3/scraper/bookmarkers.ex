@@ -7,13 +7,12 @@ defmodule Ao3.Scraper.Bookmarkers do
   alias Ao3.Scraper.Pagination
   alias Ao3.Scraper.Urls
 
-  @type body :: Utils.html
+  @type body :: Utils.html()
 
   @spec fetch_story_bookmarkers(StoryId.t()) :: [UserId.t()]
   def fetch_story_bookmarkers(story) do
     story
-    |> Pagination.for_pages(&fetch_bookmarkers_page/2, 
-    &parse_bookmarkers_from_page/1)
+    |> Pagination.for_pages(&fetch_bookmarkers_page/2, &parse_bookmarkers_from_page/1)
     |> Enum.concat()
     |> Enum.uniq()
   end
@@ -27,13 +26,13 @@ defmodule Ao3.Scraper.Bookmarkers do
   end
 
   @spec fetch_bookmarkers_page(StoryId.t(), String.t()) :: body
-  def fetch_bookmarkers_page(%StoryId{id: story}, page) do
+  def fetch_bookmarkers_page(story = %StoryId{}, page) do
     story
     |> Urls.story_bookmarks(page)
     |> Utils.fetch_body()
   end
 
-  @spec parse_bookmarkers_from_page(body) :: [UserId.t]
+  @spec parse_bookmarkers_from_page(body) :: [UserId.t()]
   defp parse_bookmarkers_from_page(body) do
     body
     |> Floki.find(".user .byline a")
