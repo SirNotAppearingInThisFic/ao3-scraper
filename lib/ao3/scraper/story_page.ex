@@ -15,8 +15,6 @@ defmodule Ao3.Scraper.StoryPage do
     {type, link_html} = find_story_link(html)
 
     %Story{
-      # TODO: Handle series (see https://archiveofourown.org/series/927273/bookmarks)
-      # TODO: Probably add a type field
       id: link_html |> find_story_id(),
       author_name: html |> find_header_author() |> Floki.text(),
       type: type,
@@ -38,8 +36,8 @@ defmodule Ao3.Scraper.StoryPage do
     series_link = find_series_link(html)
 
     cond do
-      work_link -> {:work, work_link}
-      find_series_link(html) -> {:series, series_link}
+      !Enum.empty?(work_link) -> {:work, work_link}
+      !Enum.empty?(series_link) -> {:series, series_link}
     end
   end
 
@@ -71,12 +69,12 @@ defmodule Ao3.Scraper.StoryPage do
     Floki.find(html, ".header .heading a[rel=\"author\"]")
   end
 
-  defp find_work_link(html) do
+  def find_work_link(html) do
     html
     |> Floki.find(".header .heading a[href*=\"/works/\"]")
   end
 
-  defp find_series_link(html) do
+  def find_series_link(html) do
     html
     |> Floki.find(".header .heading a[href*=\"/series/\"]")
   end

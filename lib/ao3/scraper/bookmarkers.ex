@@ -21,7 +21,7 @@ defmodule Ao3.Scraper.Bookmarkers do
   def fetch_story_data(story) do
     story
     |> fetch_bookmarkers_page("1")
-    |> Floki.find(".work.blurb.group")
+    |> Floki.find(".blurb.group")
     |> StoryPage.find_story_data()
   end
 
