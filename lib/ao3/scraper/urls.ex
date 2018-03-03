@@ -1,3 +1,5 @@
+require IEx
+
 defmodule Ao3.Scraper.Urls do
   alias Ao3.Scraper.StoryId
   alias Ao3.Scraper.UserId
@@ -18,10 +20,13 @@ defmodule Ao3.Scraper.Urls do
 
   @spec story(StoryId.t()) :: t
   def story(%StoryId{id: id, type: type}) do
-    "#{@base}/#{type}/#{id}"
+    "#{@base}/#{pluralize(type)}/#{id}"
   end
 
   def user(user_id) do
     "#{@base}/users/#{user_id}/pseuds/#{user_id}"
   end
+
+  defp pluralize(:work), do: "works"
+  defp pluralize(:series), do: "series"
 end
