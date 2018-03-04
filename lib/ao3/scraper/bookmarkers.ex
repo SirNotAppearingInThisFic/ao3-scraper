@@ -19,10 +19,13 @@ defmodule Ao3.Scraper.Bookmarkers do
 
   @spec fetch_story_data(StoryId.t()) :: Story.t()
   def fetch_story_data(story) do
-    story
-    |> fetch_bookmarkers_page("1")
-    |> Floki.find(".blurb.group")
-    |> StoryPage.find_story_data()
+    case story
+         |> fetch_bookmarkers_page("1")
+         |> Floki.find(".blurb.group")
+         |> StoryPage.find_story_data() do
+      {:ok, story} -> story
+      {:error, error} -> raise error
+    end
   end
 
   @spec fetch_bookmarkers_page(StoryId.t(), String.t()) :: body

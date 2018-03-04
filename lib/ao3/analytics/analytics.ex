@@ -1,3 +1,5 @@
+require IEx
+
 defmodule Ao3.Analytics do
   import Ecto.Query
 
@@ -29,7 +31,7 @@ defmodule Ao3.Analytics do
   @spec fetch_bookmarker_bookmarks([String.t()]) :: [any]
   def fetch_bookmarker_bookmarks(usernames) do
     usernames
-    |> Task.async_stream(&fetch_one_bookmarkers_bookmarks/1)
+    |> Task.async_stream(&fetch_one_bookmarkers_bookmarks/1, timeout: :infinity)
     |> Enum.to_list()
   end
 
@@ -37,10 +39,11 @@ defmodule Ao3.Analytics do
   defp fetch_one_bookmarkers_bookmarks(username) do
     with user <- Repo.get(User, username),
          true <- FetcherChecker.fetch_user_bookmarks?(user),
-         {:ok, user} <- CreateOrUpdate.create_or_update_user_bookmarks(user, username),
-         _ <- delete_all_bookmark_joins(username) do
-      username
-      |> Scraper.fetch_bookmarked_story_data()
+         stories = Scraper.fetch_bookmarked_story_data(username) do
+      {:ok, user} = CreateOrUpdate.create_or_update_user_bookmarks(user, username)
+      delete_all_bookmark_joins(user.username)
+
+      stories
       |> Enum.map(fn story_data ->
         story = create_or_update_story_data(story_data)
         %{username: user.username, story_id: story.id}
@@ -57,12 +60,13 @@ defmodule Ao3.Analytics do
   defp create_or_update_story_data(story_data) do
     %{id: story_id} = story_data
     story = Repo.get(Story, story_id)
-    {:ok, story} = CreateOrUpdate.create_or_update_story_data(story, story_data)
-    story
+    case CreateOrUpdate.create_or_update_story_data(story, story_data) do
+      {:ok, story} -> story
+    end
   end
 
   defp insert_all_bookmark_joins(data) do
-    Repo.insert_all(:bookmarks, data)
+    Repo.insert_all("bookmarks", data)
   end
 
   defp delete_all_bookmark_joins(username) do

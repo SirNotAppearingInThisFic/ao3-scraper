@@ -4,7 +4,7 @@ defmodule Ao3.Scraper.Utils do
   @spec fetch_body(String.t()) :: Floki.html_tree()
   def fetch_body(url) do
     url
-    |> HTTPoison.get!()
+    |> HTTPoison.get!([], recv_timeout: :infinity)
     |> Map.get(:body)
   end
 end

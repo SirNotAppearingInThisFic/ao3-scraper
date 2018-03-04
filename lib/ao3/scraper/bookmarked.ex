@@ -17,6 +17,8 @@ defmodule Ao3.Scraper.Bookmarked do
 
   @spec fetch_bookmarked_page(UserId.t(), String.t()) :: html()
   defp fetch_bookmarked_page(user = %UserId{}, page) do
+    IO.puts("Fetching boomarks for: #{user.id}, page #{page}")
+
     user
     |> Urls.user_bookmarks(page)
     |> Utils.fetch_body()
@@ -26,6 +28,20 @@ defmodule Ao3.Scraper.Bookmarked do
   defp parse_bookmarked_stories(body) do
     body
     |> Floki.find(".bookmark.blurb.group")
-    |> Enum.map(&StoryPage.find_story_data/1)
+    |> Stream.map(&StoryPage.find_story_data/1)
+    |> Stream.filter(fn
+      {:ok, story} ->
+        IO.puts("Fetched story: #{story.id}")
+        true
+
+      {:error, :unknown_type} ->
+        IO.puts("UNKNOWN TYPE")
+        false
+
+      {:error, :deleted} ->
+        IO.puts("DELETED STORY")
+        false
+    end)
+    |> Enum.map(fn {:ok, story} -> story end)
   end
 end

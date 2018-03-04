@@ -6,28 +6,39 @@ defmodule Ao3.Scraper.StoryPage do
   alias Ao3.Scraper.Utils
   alias Ao3.Scraper.Story
 
+  @type response :: {:ok, Story.t()} | {:error, error}
+  @type error :: :deleted | :unknown_type
   @type html :: Utils.html()
 
   @chapter_regex ~r/\d+\/(\d+)/
 
-  @spec find_story_data(html) :: Story.t()
+  @spec find_story_data(html) :: response
   def find_story_data(html) do
-    {type, link_html} = find_story_link(html)
+    html
+    |> find_story_link()
+    |> parse_story_data(html)
+  end
 
-    %Story{
-      id: link_html |> find_story_id(),
-      author_name: html |> find_header_author() |> Floki.text(),
-      type: type,
-      name: link_html |> Floki.text(),
-      fandoms: [],
-      tags: [],
-      word_count: int_dd(html, "words"),
-      chapter_count: html |> find_dd("chapters") |> parse_chapters(),
-      comment_count: int_dd(html, "comments"),
-      kudos_count: int_dd(html, "kudos"),
-      bookmark_count: int_dd(html, "bookmarks"),
-      hit_count: int_dd(html, "hits")
-    }
+  @spec parse_story_data({atom, html}, html) :: response
+  defp parse_story_data({:deleted, _}, _), do: {:error, :deleted}
+  defp parse_story_data({:unknown_type, _}, _), do: {:error, :unknown_type}
+
+  defp parse_story_data({type, link_html}, html) do
+    {:ok,
+     %Story{
+       id: link_html |> find_story_id(),
+       author_name: html |> find_header_author() |> Floki.text(),
+       type: type,
+       name: link_html |> Floki.text(),
+       fandoms: [],
+       tags: [],
+       word_count: int_dd(html, "words"),
+       chapter_count: html |> find_dd("chapters") |> parse_chapters(),
+       comment_count: int_dd(html, "comments"),
+       kudos_count: int_dd(html, "kudos"),
+       bookmark_count: int_dd(html, "bookmarks"),
+       hit_count: int_dd(html, "hits")
+     }}
   end
 
   @spec find_story_link(html) :: {Story.story_type(), html}
@@ -38,6 +49,8 @@ defmodule Ao3.Scraper.StoryPage do
     cond do
       !Enum.empty?(work_link) -> {:work, work_link}
       !Enum.empty?(series_link) -> {:series, series_link}
+      is_deleted?(html) -> {:deleted, []}
+      true -> {:unknown_type, []}
     end
   end
 
@@ -77,5 +90,12 @@ defmodule Ao3.Scraper.StoryPage do
   def find_series_link(html) do
     html
     |> Floki.find(".header .heading a[href*=\"/series/\"]")
+  end
+
+  @spec is_deleted?(html) :: boolean
+  defp is_deleted?(html) do
+    html
+    |> Floki.text()
+    |> String.contains?("This has been deleted, sorry!")
   end
 end
