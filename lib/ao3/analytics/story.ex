@@ -6,6 +6,7 @@ defmodule Ao3.Analytics.Story do
 
   @type story_type :: :work | :status
 
+  alias Ao3.Repo
   alias Ecto.Changeset
   alias Ao3.Analytics.StoryTypeEnum
   alias Ao3.Analytics.User
@@ -89,5 +90,10 @@ defmodule Ao3.Analytics.Story do
     struct
     |> changeset(params)
     |> put_change(:bookmarks_fetched_at, Timex.now())
+  end
+
+
+  def find(story_id, story_type) do
+    Repo.get_by(Story, story_id: story_id, type: story_type)
   end
 end

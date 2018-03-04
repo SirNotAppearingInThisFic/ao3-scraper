@@ -1,9 +1,9 @@
-defmodule Mix.Tasks.Bookmarks do
+defmodule Mix.Tasks.Best do
   use Mix.Task
 
   alias Ao3.Analytics
 
-  @shortdoc "Popualate bookmarks for a story"
+  @shortdoc "Find the best stories for a story"
   def run([story_id]), do: run([story_id, "work"])
 
   def run([story_id, type]) do
@@ -18,6 +18,8 @@ defmodule Mix.Tasks.Bookmarks do
         _ -> :work
       end
 
-    Analytics.populate(story_id, story_type)
+    story_id
+    |> Analytics.best_story(story_type)
+    |> IO.inspect()
   end
 end
