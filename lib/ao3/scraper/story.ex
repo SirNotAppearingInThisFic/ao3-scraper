@@ -4,7 +4,7 @@ defmodule Ao3.Scraper.Story do
   @type story_type :: Ao3.Analytics.story_type()
 
   @type t :: %Story{
-          id: integer,
+          story_id: integer,
           author_name: String.t(),
           type: story_type(),
           name: String.t(),
@@ -15,16 +15,18 @@ defmodule Ao3.Scraper.Story do
           comment_count: integer,
           kudos_count: integer,
           bookmark_count: integer,
-          hit_count: integer
+          hit_count: integer,
+          story_date: Timex.Types.valid_datetime() | nil,
         }
 
   defstruct [
-    :id,
+    :story_id,
     :author_name,
     :type,
     :name,
     :fandoms,
     :tags,
+    :story_date,
     :word_count,
     :chapter_count,
     :comment_count,

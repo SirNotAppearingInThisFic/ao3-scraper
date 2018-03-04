@@ -12,7 +12,7 @@ defmodule Ao3.Scraper.Bookmarkers do
   @spec fetch_story_bookmarkers(StoryId.t()) :: [UserId.t()]
   def fetch_story_bookmarkers(story) do
     story
-    |> Pagination.for_pages(&fetch_bookmarkers_page/2, &parse_bookmarkers_from_page/1)
+    |> Pagination.for_pages(100, &fetch_bookmarkers_page/2, &parse_bookmarkers_from_page/1)
     |> Enum.concat()
     |> Enum.uniq()
   end
@@ -22,6 +22,7 @@ defmodule Ao3.Scraper.Bookmarkers do
     case story
          |> fetch_bookmarkers_page("1")
          |> Floki.find(".blurb.group")
+         |> List.first()
          |> StoryPage.find_story_data() do
       {:ok, story} -> story
       {:error, error} -> raise error

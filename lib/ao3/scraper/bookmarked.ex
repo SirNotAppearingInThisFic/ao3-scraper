@@ -11,7 +11,7 @@ defmodule Ao3.Scraper.Bookmarked do
   @spec fetch_bookmarked_story_data(UserId.t()) :: [Story.t()]
   def fetch_bookmarked_story_data(user) do
     user
-    |> Pagination.for_pages(&fetch_bookmarked_page/2, &parse_bookmarked_stories/1)
+    |> Pagination.for_pages(10, &fetch_bookmarked_page/2, &parse_bookmarked_stories/1)
     |> Enum.concat()
   end
 
@@ -31,7 +31,7 @@ defmodule Ao3.Scraper.Bookmarked do
     |> Stream.map(&StoryPage.find_story_data/1)
     |> Stream.filter(fn
       {:ok, story} ->
-        IO.puts("Fetched story: #{story.id}")
+        IO.puts("Fetched story: #{story.story_id}")
         true
 
       {:error, :unknown_type} ->

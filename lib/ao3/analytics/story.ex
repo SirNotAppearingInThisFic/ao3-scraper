@@ -27,9 +27,10 @@ defmodule Ao3.Analytics.Story do
           kudos_count: integer,
           bookmark_count: integer,
           hit_count: integer,
-          bookmarks_fetched_at: Timex.Types.datetime() | nil,
-          inserted_at: Timex.Types.datetime() | nil,
-          updated_at: Timex.Types.datetime() | nil
+          bookmarks_fetched_at: Timex.Types.valid_datetime() | nil,
+          story_date: Timex.Types.valid_datetime() | nil,
+          inserted_at: Timex.Types.valid_datetime() | nil,
+          updated_at: Timex.Types.valid_datetime() | nil
         }
 
   @typep not_loaded :: %Ecto.Association.NotLoaded{}
@@ -58,6 +59,7 @@ defmodule Ao3.Analytics.Story do
     field(:bookmark_count, :integer, default: 0)
     field(:hit_count, :integer, default: 0)
     field(:bookmarks_fetched_at, Timex.Ecto.DateTime)
+    field(:story_date, Timex.Ecto.DateTime)
 
     timestamps()
   end
@@ -72,6 +74,7 @@ defmodule Ao3.Analytics.Story do
       :name,
       :tags,
       :fandoms,
+      :story_date,
       :word_count,
       :chapter_count,
       :comment_count,

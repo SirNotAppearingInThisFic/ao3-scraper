@@ -11,7 +11,7 @@ defmodule Ao3.Analytics.User do
   @type t :: %User{
           username: String.t() | nil,
           bookmarks: [Story.t()] | not_loaded,
-          bookmarks_fetched_at: Timex.Types.datetime() | nil
+          bookmarks_fetched_at: Timex.Types.valid_datetime() | nil
         }
 
   @typep not_loaded :: %Ecto.Association.NotLoaded{}

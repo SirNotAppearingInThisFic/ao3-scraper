@@ -15,8 +15,7 @@ defmodule Ao3.Analytics do
   @spec populate_bookmarkers_bookmarks(integer, story_type) :: :ok | any
   def populate_bookmarkers_bookmarks(story_id, story_type) do
     with story <- Repo.get_by(Story, story_id: story_id, type: story_type),
-         # TODO: This doesn't seem to be working
-         true <- FetcherChecker.fetch_story_bookmarkers?(story),
+         # true <- FetcherChecker.fetch_story_bookmarkers?(story),
          story_data <- Scraper.fetch_story_data(story_id, story_type),
          {:ok, _story} <- CreateOrUpdate.create_or_update_story_bookmarks(story, story_data),
          usernames <- Scraper.fetch_story_bookmarkers(story_id, story_type),
@@ -58,8 +57,9 @@ defmodule Ao3.Analytics do
   end
 
   defp create_or_update_story_data(story_data) do
-    %{id: story_id} = story_data
-    story = Repo.get(Story, story_id)
+    %{story_id: story_id} = story_data
+    story = Repo.get_by(Story, story_id: story_id)
+
     case CreateOrUpdate.create_or_update_story_data(story, story_data) do
       {:ok, story} -> story
     end

@@ -26,12 +26,13 @@ defmodule Ao3.Scraper.StoryPage do
   defp parse_story_data({type, link_html}, html) do
     {:ok,
      %Story{
-       id: link_html |> find_story_id(),
+       story_id: link_html |> find_story_id(),
        author_name: html |> find_header_author() |> Floki.text(),
        type: type,
        name: link_html |> Floki.text(),
-       fandoms: [],
-       tags: [],
+       fandoms: html |> find_fandoms(),
+       tags: html |> find_tags(),
+       story_date: html |> find_date(),
        word_count: int_dd(html, "words"),
        chapter_count: html |> find_dd("chapters") |> parse_chapters(),
        comment_count: int_dd(html, "comments"),
@@ -63,7 +64,7 @@ defmodule Ao3.Scraper.StoryPage do
   end
 
   @spec story_id_of_story_url(String.t()) :: integer
-  def story_id_of_story_url(url) do
+  defp story_id_of_story_url(url) do
     url
     |> String.split("/")
     |> Enum.at(2)
@@ -82,14 +83,40 @@ defmodule Ao3.Scraper.StoryPage do
     Floki.find(html, ".header .heading a[rel=\"author\"]")
   end
 
-  def find_work_link(html) do
+  defp find_work_link(html) do
     html
     |> Floki.find(".header .heading a[href*=\"/works/\"]")
   end
 
-  def find_series_link(html) do
+  defp find_series_link(html) do
     html
     |> Floki.find(".header .heading a[href*=\"/series/\"]")
+  end
+
+  @spec find_fandoms(html) :: [String.t()]
+  defp find_fandoms(html) do
+    html
+    |> Floki.find(".fandoms .tag")
+    |> Enum.map(&Floki.text/1)
+  end
+
+  @spec find_tags(html) :: [String.t()]
+  defp find_tags(html) do
+    html
+    |> Floki.find(".tags .tag")
+    |> Enum.map(&Floki.text/1)
+  end
+
+  @spec find_date(html) :: Timex.Types.valid_datetime()
+  defp find_date(html) do
+    case html
+         |> Floki.find(".header .datetime")
+         |> Floki.text()
+         |> Timex.parse("{0D} {Mshort} {YYYY}") do
+      {:ok, date} -> date
+      {:error, error} -> 
+        raise "can't parse story date"
+    end
   end
 
   @spec is_deleted?(html) :: boolean

@@ -16,6 +16,7 @@ defmodule Ao3.Repo.Migrations.AddInitTables do
       add :bookmark_count, :integer
       add :hit_count, :integer
       add :bookmarks_fetched_at, :utc_datetime
+      add :story_date, :utc_datetime
 
       timestamps()
     end

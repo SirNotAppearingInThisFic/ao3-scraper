@@ -8,12 +8,17 @@ defmodule Ao3.Analytics.StoryTest do
   doctest Story
 
   test "changeset" do
+    date = {2018, 1, 1}
+    ecto_date = Timex.to_datetime(date)
+
     story_data = %Scraper.Story{
-      id: 1,
+      story_id: 123,
       author_name: "SirNotAppearingInThisFic",
       name: "A Story",
+      type: :work,
       fandoms: ["Star Wars"],
       tags: ["Tag", "Tag2"],
+      story_date: date,
       word_count: 1000,
       chapter_count: 1,
       comment_count: 50,
@@ -23,11 +28,12 @@ defmodule Ao3.Analytics.StoryTest do
     }
 
     expected_story = %Story{
-      id: 1,
+      story_id: 123,
       author_name: "SirNotAppearingInThisFic",
       name: "A Story",
       fandoms: ["Star Wars"],
       tags: ["Tag", "Tag2"],
+      story_date: ecto_date,
       word_count: 1000,
       chapter_count: 1,
       comment_count: 50,
