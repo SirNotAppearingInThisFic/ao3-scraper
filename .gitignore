@@ -23,3 +23,5 @@ erl_crash.dump
 ao3-*.tar
 
 .elixir_ls
+
+*.swp

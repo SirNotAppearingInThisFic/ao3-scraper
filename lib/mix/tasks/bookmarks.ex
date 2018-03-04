@@ -16,6 +16,6 @@ defmodule Mix.Tasks.Bookmarks do
         _ -> :work
       end
 
-    Analytics.populate_bookmarkers_bookmarks(story_id, story_type)
+    Analytics.populate(story_id, story_type)
   end
 end
