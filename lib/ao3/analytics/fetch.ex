@@ -1,6 +1,4 @@
-require IEx
-
-defmodule Ao3.Analytics do
+defmodule Ao3.Analytics.Fetch do
   import Ecto.Query
 
   alias Ao3.Repo
