@@ -4,23 +4,28 @@ defmodule Ao3.Scraper.Bookmarked do
   alias Ao3.Scraper.Pagination
   alias Ao3.Scraper.Urls
   alias Ao3.Scraper.Story
+  alias Ao3.Scraper.Tag
   alias Ao3.Scraper.StoryPage
 
   @type html :: Utils.html()
 
-  @spec fetch_bookmarked_story_data(UserId.t()) :: [Story.t()]
-  def fetch_bookmarked_story_data(user) do
+  @spec fetch_bookmarked_story_data(UserId.t(), [Tag.t()]) :: [Story.t()]
+  def fetch_bookmarked_story_data(user, fandoms) do
     user
-    |> Pagination.for_pages(10, &fetch_bookmarked_page/2, &parse_bookmarked_stories/1)
+    |> Pagination.for_pages(
+      10,
+      &fetch_bookmarked_page(&1, fandoms, &2),
+      &parse_bookmarked_stories/1
+    )
     |> Enum.concat()
   end
 
-  @spec fetch_bookmarked_page(UserId.t(), String.t()) :: html()
-  defp fetch_bookmarked_page(user = %UserId{}, page) do
-    IO.puts("Fetching boomarks for: #{user.id}, page #{page}")
+  @spec fetch_bookmarked_page(UserId.t(), [Tag.t()], String.t()) :: html()
+  defp fetch_bookmarked_page(user = %UserId{}, fandoms, page) do
+    IO.puts("Fetching bookmarks for: #{user.id}, page #{page}")
 
     user
-    |> Urls.user_bookmarks(page)
+    |> Urls.user_bookmarks(fandoms, page)
     |> Utils.fetch_body()
   end
 

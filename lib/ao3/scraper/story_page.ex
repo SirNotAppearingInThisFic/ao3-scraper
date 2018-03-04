@@ -5,6 +5,7 @@ defmodule Ao3.Scraper.StoryPage do
 
   alias Ao3.Scraper.Utils
   alias Ao3.Scraper.Story
+  alias Ao3.Scraper.Tag
 
   @type response :: {:ok, Story.t()} | {:error, error}
   @type error :: :deleted | :unknown_type
@@ -30,7 +31,6 @@ defmodule Ao3.Scraper.StoryPage do
        author_name: html |> find_header_author() |> Floki.text(),
        type: type,
        name: link_html |> Floki.text(),
-       fandoms: html |> find_fandoms(),
        tags: html |> find_tags(),
        story_date: html |> find_date(),
        word_count: int_dd(html, "words"),
@@ -93,18 +93,18 @@ defmodule Ao3.Scraper.StoryPage do
     |> Floki.find(".header .heading a[href*=\"/series/\"]")
   end
 
-  @spec find_fandoms(html) :: [String.t()]
-  defp find_fandoms(html) do
-    html
-    |> Floki.find(".fandoms .tag")
-    |> Enum.map(&Floki.text/1)
-  end
-
-  @spec find_tags(html) :: [String.t()]
+  @spec find_tags(html) :: [Tag.t()]
   defp find_tags(html) do
-    html
-    |> Floki.find(".tags .tag")
-    |> Enum.map(&Floki.text/1)
+    [
+      {".header .fandoms", :fandom},
+      {".tags .warnings", :warning},
+      {".tags .relationships", :ship},
+      {".tags .characters", :character},
+      {".tags .freeforms", :freeform}
+    ]
+    |> Enum.flat_map(fn {selector, tag} ->
+      make_tags(html, "#{selector} .tag", tag)
+    end)
   end
 
   @spec find_date(html) :: Timex.Types.valid_datetime()
@@ -113,8 +113,10 @@ defmodule Ao3.Scraper.StoryPage do
          |> Floki.find(".header .datetime")
          |> Floki.text()
          |> Timex.parse("{0D} {Mshort} {YYYY}") do
-      {:ok, date} -> date
-      {:error, error} -> 
+      {:ok, date} ->
+        date
+
+      {:error, _error} ->
         raise "can't parse story date"
     end
   end
@@ -124,5 +126,14 @@ defmodule Ao3.Scraper.StoryPage do
     html
     |> Floki.text()
     |> String.contains?("This has been deleted, sorry!")
+  end
+
+  @spec make_tags(html, String.t(), Tag.tag_type()) :: [Tag.t()]
+  defp make_tags(html, selector, tag_type) do
+    html
+    |> Floki.find(selector)
+    |> Enum.map(&Floki.text/1)
+    |> Stream.map(&%Tag{type: tag_type, tag: &1})
+    |> Enum.to_list()
   end
 end

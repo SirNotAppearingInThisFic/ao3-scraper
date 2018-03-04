@@ -2,7 +2,6 @@ defmodule Ao3.Analytics.StoryTest do
   use ExUnit.Case
 
   alias Ao3.Scraper
-  alias Ao3.Analytics.User
   alias Ao3.Analytics.Story
 
   doctest Story
@@ -16,8 +15,15 @@ defmodule Ao3.Analytics.StoryTest do
       author_name: "SirNotAppearingInThisFic",
       name: "A Story",
       type: :work,
-      fandoms: ["Star Wars"],
-      tags: ["Tag", "Tag2"],
+      tags: [
+        %Scraper.Tag{type: :fandom, tag: "Star Wars"},
+        %Scraper.Tag{type: :ship, tag: "Poe/Finn"},
+        %Scraper.Tag{type: :character, tag: "Poe"},
+        %Scraper.Tag{type: :character, tag: "Finn"},
+        %Scraper.Tag{type: :warning, tag: "Too Cool 4 School"},
+        %Scraper.Tag{type: :freeform, tag: "Tag1"},
+        %Scraper.Tag{type: :freeform, tag: "Tag2"},
+      ],
       story_date: date,
       word_count: 1000,
       chapter_count: 1,
@@ -32,7 +38,10 @@ defmodule Ao3.Analytics.StoryTest do
       author_name: "SirNotAppearingInThisFic",
       name: "A Story",
       fandoms: ["Star Wars"],
-      tags: ["Tag", "Tag2"],
+      ships: ["Poe/Finn"],
+      characters: ["Poe", "Finn"],
+      warnings: ["Too Cool 4 School"],
+      tags: ["Tag1", "Tag2"],
       story_date: ecto_date,
       word_count: 1000,
       chapter_count: 1,

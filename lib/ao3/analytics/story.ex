@@ -21,6 +21,9 @@ defmodule Ao3.Analytics.Story do
           bookmarkers: [User.t()] | not_loaded,
           name: String.t(),
           fandoms: [String.t()],
+          ships: [String.t()],
+          warnings: [String.t()],
+          characters: [String.t()],
           tags: [String.t()],
           word_count: integer,
           chapter_count: integer,
@@ -49,8 +52,11 @@ defmodule Ao3.Analytics.Story do
     field(:story_id, :integer)
     field(:type, StoryTypeEnum, default: :work)
 
-    field(:tags, {:array, :string}, default: [])
     field(:fandoms, {:array, :string}, default: [])
+    field(:ships, {:array, :string}, default: [])
+    field(:warnings, {:array, :string}, default: [])
+    field(:characters, {:array, :string}, default: [])
+    field(:tags, {:array, :string}, default: [])
 
     field(:name, :string, default: "")
     field(:word_count, :integer, default: 0)
@@ -66,15 +72,20 @@ defmodule Ao3.Analytics.Story do
   end
 
   @spec changeset(t, Scraper.story()) :: Changeset.t()
-  def changeset(struct, params) do
+  def changeset(struct, story) do
+    params = story_to_params(story)
+
     struct
-    |> cast(params |> Map.from_struct(), [
+    |> cast(params, [
       :story_id,
       :type,
       :author_name,
       :name,
-      :tags,
       :fandoms,
+      :ships,
+      :warnings,
+      :characters,
+      :tags,
       :story_date,
       :word_count,
       :chapter_count,
@@ -92,8 +103,38 @@ defmodule Ao3.Analytics.Story do
     |> put_change(:bookmarks_fetched_at, Timex.now())
   end
 
-
   def find(story_id, story_type) do
     Repo.get_by(Story, story_id: story_id, type: story_type)
+  end
+
+  @spec story_to_params(Scraper.story()) :: map
+  defp story_to_params(story) do
+    tags = story.tags
+
+    fandoms = filter_tags(tags, :fandom)
+    ships = filter_tags(tags, :ship)
+    warnings = filter_tags(tags, :warning)
+    characters = filter_tags(tags, :character)
+    tags = filter_tags(tags, :freeform)
+
+    story
+    |> Map.from_struct()
+    |> Map.merge(%{
+      fandoms: fandoms,
+      ships: ships,
+      warnings: warnings,
+      characters: characters,
+      tags: tags
+    })
+  end
+
+  @spec filter_tags([Scraper.tag()], Scraper.tag_type()) :: [String.t()]
+  defp filter_tags(tags, tag_type) do
+    tags
+    |> Enum.filter(fn
+      %Scraper.Tag{type: ^tag_type} -> true
+      _ -> false
+    end)
+    |> Enum.map(fn %Scraper.Tag{tag: tag} -> tag end)
   end
 end

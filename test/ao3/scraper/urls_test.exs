@@ -3,15 +3,24 @@ defmodule Ao3.Scraper.UrlsTest do
 
   alias Ao3.Scraper.StoryId
   alias Ao3.Scraper.UserId
+  alias Ao3.Scraper.Tag
   alias Ao3.Scraper.Urls
 
   doctest Urls
 
   test "user_bookmarks" do
     user = %UserId{id: "testname"}
+    tags = [
+      %Tag{type: :fandom, tag: "Star Wars"},
+      %Tag{type: :ship, tag: "Finn/Poe"}
+    ]
 
-    assert Urls.user_bookmarks(user, 1) ==
-             "https://archiveofourown.org/users/testname/bookmarks?page=1"
+    query_key = URI.encode_www_form("bookmark_search[query]")
+    query_value = URI.encode_www_form("\"Star Wars\"||\"Finn/Poe\"")
+    expected_query = "#{query_key}=#{query_value}"
+
+    assert Urls.user_bookmarks(user, tags, 1) ==
+             "https://archiveofourown.org/bookmarks?#{expected_query}&page=1&user_id=testname"
   end
 
   test "story_bookmarks" do

@@ -1,12 +1,11 @@
 defmodule Ao3.Analytics do
-  @type story_type :: Story.story_type()
-
   import Ecto.Query
 
   alias Ao3.Repo
   alias Ao3.Analytics.Story
-  alias Ao3.Analytics.User
   alias Ao3.Analytics.Fetch
+
+  @type story_type :: Story.story_type()
 
   @spec populate(integer, story_type) :: :ok | any
   defdelegate populate(story_id, story_type), to: Fetch, as: :populate_bookmarkers_bookmarks
