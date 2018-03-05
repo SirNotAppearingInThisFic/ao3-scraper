@@ -11,7 +11,7 @@ defmodule Ao3.Repo.Migrations.AddInitTables do
     create table(:stories) do
       add :story_id, :integer
       add :type, :integer
-      add :author_name, references(:users, column: :username, type: :string)
+      add :author_name, :string
       add :fandoms, {:array, :string}
       add :warnings, {:array, :string}
       add :ships, {:array, :string}

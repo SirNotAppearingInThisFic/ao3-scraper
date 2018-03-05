@@ -1,5 +1,5 @@
 defmodule Ao3.Scraper.Pagination do
-  @page_re ~r/\?page=(\d+)/
+  @page_re ~r/[?&]page=(\d+)/
 
   @type page :: integer
   @type fetch_body :: (any, page -> Floki.html_tree())
