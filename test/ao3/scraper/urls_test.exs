@@ -10,6 +10,7 @@ defmodule Ao3.Scraper.UrlsTest do
 
   test "user_bookmarks" do
     user = %UserId{id: "testname"}
+
     tags = [
       %Tag{type: :fandom, tag: "Star Wars"},
       %Tag{type: :ship, tag: "Finn/Poe"}

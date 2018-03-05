@@ -22,7 +22,7 @@ defmodule Ao3.Analytics.StoryTest do
         %Scraper.Tag{type: :character, tag: "Finn"},
         %Scraper.Tag{type: :warning, tag: "Too Cool 4 School"},
         %Scraper.Tag{type: :freeform, tag: "Tag1"},
-        %Scraper.Tag{type: :freeform, tag: "Tag2"},
+        %Scraper.Tag{type: :freeform, tag: "Tag2"}
       ],
       story_date: date,
       word_count: 1000,

@@ -8,5 +8,5 @@ defmodule Ao3.Scraper.Tag do
           tag: String.t()
         }
 
-  defstruct [type: :freeform, tag: ""]
+  defstruct type: :freeform, tag: ""
 end

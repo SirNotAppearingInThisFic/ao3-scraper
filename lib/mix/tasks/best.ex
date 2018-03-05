@@ -7,7 +7,7 @@ defmodule Mix.Tasks.Best do
   def run([story_id]), do: run([story_id, "work"])
 
   def run([story_id, type]) do
-    Mix.Task.run "app.start", []
+    Mix.Task.run("app.start", [])
 
     {story_id, ""} = Integer.parse(story_id)
 

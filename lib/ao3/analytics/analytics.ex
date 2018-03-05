@@ -41,10 +41,10 @@ defmodule Ao3.Analytics do
   end
 
   defp bookmarkers_query(story_id) do
-      from(
-        b in "bookmarks",
-        where: b.story_id == ^story_id,
-        select: %{username: b.username}
-      )
+    from(
+      b in "bookmarks",
+      where: b.story_id == ^story_id,
+      select: %{username: b.username}
+    )
   end
 end

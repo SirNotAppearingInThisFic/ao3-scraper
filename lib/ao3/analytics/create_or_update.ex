@@ -21,15 +21,8 @@ defmodule Ao3.Analytics.CreateOrUpdate do
   end
 
   @spec create_or_update_story_data(Story.t() | nil, Scraper.Story.t()) :: {:ok, Story.t()}
-  def create_or_update_story_data(story, story_data) do
-    case story do
-      nil ->
-        create_story(story_data)
-
-      story ->
-        update_story(story, story_data)
-    end
-  end
+  def create_or_update_story_data(nil, story_data), do: create_story(story_data)
+  def create_or_update_story_data(story, story_data), do: update_story(story, story_data)
 
   @spec update_story(Story.t(), Scraper.Story.t()) :: {:ok, Story.t()}
   defp update_story(story, story_data) do

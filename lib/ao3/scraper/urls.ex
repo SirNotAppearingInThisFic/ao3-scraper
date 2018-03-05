@@ -9,7 +9,7 @@ defmodule Ao3.Scraper.Urls do
 
   @base "https://archiveofourown.org"
 
-  @spec user_bookmarks(UserId.t(), [Tag.t], String.t()) :: t
+  @spec user_bookmarks(UserId.t(), [Tag.t()], String.t()) :: t
   def user_bookmarks(%UserId{id: user_id}, tags, page) do
     query = %{
       "bookmark_search[query]" => tags_to_search(tags),
@@ -37,7 +37,7 @@ defmodule Ao3.Scraper.Urls do
   defp pluralize(:work), do: "works"
   defp pluralize(:series), do: "series"
 
-  @spec tags_to_search([Tag.t]) :: String.t
+  @spec tags_to_search([Tag.t()]) :: String.t()
   defp tags_to_search(tags) do
     tags
     |> Enum.map(fn %Tag{tag: tag} -> "\"#{tag}\"" end)
