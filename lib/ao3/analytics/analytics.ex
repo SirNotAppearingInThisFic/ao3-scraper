@@ -10,33 +10,37 @@ defmodule Ao3.Analytics do
   @spec populate(integer) :: :ok | any
   defdelegate populate(story_id), to: Fetch, as: :populate_bookmarkers_bookmarks
 
-  @spec best_story(integer) :: [%{story: Story.t(), count: integer}]
+  @spec best_story(integer) :: [%{story: Story.t(), rating: integer}]
   def best_story(story_id) do
     story = Story.find(story_id, :work)
 
-    story.id
+    story
     |> best_query()
     |> Repo.all()
   end
 
-  defp best_query(id) do
+  defp best_query(story) do
     from(
       s in Story,
       preload: [:bookmarkers],
-      join: bs in subquery(bookmarked_query(id)),
+      join: bs in subquery(rating_query(story)),
       on: [id: s.id],
-      where: s.id != ^id,
-      select: %{story: s, count: bs.count}
+      where: s.id != ^story.id,
+      select: %{story: s, rating: bs.rating}
     )
   end
 
-  defp bookmarked_query(story_id) do
+  defp rating_query(story) do
     from(
       b in "bookmarks",
-      join: bm in subquery(bookmarkers_query(story_id)),
+      join: s in Story,
+      on: b.story_id == s.id,
+      join: bm in subquery(bookmarkers_query(story.id)),
       on: [username: b.username],
+      where: fragment("? && ?", s.fandoms, ^story.fandoms),
+      where: fragment("? && ?", s.ships, ^story.ships),
       group_by: b.story_id,
-      select: %{id: b.story_id, count: count(b.id)},
+      select: %{id: b.story_id, rating: count(b.id)},
       order_by: [desc: :count],
       limit: 10
     )

@@ -12,11 +12,11 @@ defmodule Ao3.Repo.Migrations.AddInitTables do
       add :story_id, :integer
       add :type, :integer
       add :author_name, :string
-      add :fandoms, {:array, :string}
-      add :warnings, {:array, :string}
-      add :ships, {:array, :string}
-      add :characters, {:array, :string}
-      add :tags, {:array, :string}
+      add :fandoms, {:array, :text}
+      add :warnings, {:array, :text}
+      add :ships, {:array, :text}
+      add :characters, {:array, :text}
+      add :tags, {:array, :text}
       add :name, :string
       add :word_count, :integer
       add :chapter_count, :integer

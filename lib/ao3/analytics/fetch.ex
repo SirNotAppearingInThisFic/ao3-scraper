@@ -58,6 +58,7 @@ defmodule Ao3.Analytics.Fetch do
   end
 
   defp insert_all_bookmark_joins(data) do
+    data = Enum.dedup(data)
     Repo.insert_all("bookmarks", data)
   end
 
