@@ -48,9 +48,21 @@ defmodule Ao3.Analytics.Fetch do
     :ok
   end
 
+  @spec create_or_update_story_data(Scraper.Story.t()) :: Story.t
   defp create_or_update_story_data(story_data) do
-    %{story_id: story_id} = story_data
-    story = Repo.get_by(Story, story_id: story_id)
+    %{story_id: story_id, type: type} = story_data
+
+    # TODO: BETTER HANDLING OF MULTIPLE INSERTS
+    story =
+      Repo.all(
+        from(
+          s in Story,
+          where: s.story_id == ^story_id,
+          where: s.type == ^type,
+          limit: 1
+        )
+      )
+      |> List.first()
 
     case CreateOrUpdate.create_or_update_story_data(story, story_data) do
       {:ok, story} -> story

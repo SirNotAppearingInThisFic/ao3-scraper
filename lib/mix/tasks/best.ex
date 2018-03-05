@@ -3,6 +3,8 @@ defmodule Mix.Tasks.Best do
 
   alias Ao3.Analytics.User
   alias Ao3.Analytics
+  alias Ao3.Scraper.Urls
+  alias Ao3.Scraper.StoryId
 
   @shortdoc "Find the best stories for a story"
   def run([story_id]) do
@@ -13,9 +15,14 @@ defmodule Mix.Tasks.Best do
     story_id
     |> Analytics.best_story()
     |> Enum.map(fn %{story: story, rating: rating} ->
-      {rating, story.name, story.story_id, story.id, bookmarkers_to_names(story.bookmarkers)}
+      {rating, story.name, story_url(story)}
     end)
     |> IO.inspect()
+  end
+
+  defp story_url(story) do
+    url = Urls.story(%StoryId{id: story.story_id, type: story.type})
+    url <> "/bookmarks"
   end
 
   defp bookmarkers_to_names(bookmarkers) do

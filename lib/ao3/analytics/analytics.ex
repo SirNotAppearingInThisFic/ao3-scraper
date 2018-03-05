@@ -12,9 +12,8 @@ defmodule Ao3.Analytics do
 
   @spec best_story(integer) :: [%{story: Story.t(), rating: integer}]
   def best_story(story_id) do
-    story = Story.find(story_id, :work)
-
-    story
+    story_id
+    |> Story.find(:work)
     |> best_query()
     |> Repo.all()
   end
@@ -25,7 +24,6 @@ defmodule Ao3.Analytics do
       preload: [:bookmarkers],
       join: bs in subquery(rating_query(story)),
       on: [id: s.id],
-      where: s.id != ^story.id,
       select: %{story: s, rating: bs.rating}
     )
   end
@@ -40,6 +38,7 @@ defmodule Ao3.Analytics do
       where: fragment("? && ?", s.fandoms, ^story.fandoms),
       where: fragment("? && ?", s.ships, ^story.ships),
       group_by: b.story_id,
+      where: s.id != ^story.id,
       select: %{id: b.story_id, rating: count(b.id)},
       order_by: [desc: :count],
       limit: 10
