@@ -9,13 +9,13 @@ defmodule Ao3.Analytics.Fetch do
 
   @type story_type :: Story.story_type()
 
-  @spec populate_bookmarkers_bookmarks(integer, story_type) :: :ok | any
-  def populate_bookmarkers_bookmarks(story_id, story_type) do
-    with story <- Repo.get_by(Story, story_id: story_id, type: story_type),
-         story_data <- Scraper.fetch_story_data(story_id, story_type),
+  @spec populate_bookmarkers_bookmarks(integer) :: :ok | any
+  def populate_bookmarkers_bookmarks(story_id) do
+    with story <- Repo.get_by(Story, story_id: story_id, type: :work),
+         story_data <- Scraper.fetch_story_data(story_id, :work),
          {:ok, story} <- CreateOrUpdate.create_or_update_story_bookmarks(story, story_data),
          tags <- tag_names(story),
-         usernames <- Scraper.fetch_story_bookmarkers(story_id, story_type),
+         usernames <- Scraper.fetch_story_bookmarkers(story_id, :work),
          _ <- fetch_bookmarker_bookmarks(usernames, tags) do
       :ok
     else

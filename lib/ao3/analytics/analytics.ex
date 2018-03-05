@@ -7,12 +7,12 @@ defmodule Ao3.Analytics do
 
   @type story_type :: Story.story_type()
 
-  @spec populate(integer, story_type) :: :ok | any
-  defdelegate populate(story_id, story_type), to: Fetch, as: :populate_bookmarkers_bookmarks
+  @spec populate(integer) :: :ok | any
+  defdelegate populate(story_id), to: Fetch, as: :populate_bookmarkers_bookmarks
 
-  @spec best_story(integer, story_type) :: [Story.t()]
-  def best_story(story_id, story_type) do
-    story = Story.find(story_id, story_type)
+  @spec best_story(integer) :: [Story.t()]
+  def best_story(story_id) do
+    story = Story.find(story_id, :work)
 
     story.id
     |> best_query()
