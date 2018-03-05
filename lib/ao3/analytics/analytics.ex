@@ -10,7 +10,7 @@ defmodule Ao3.Analytics do
   @spec populate(integer) :: :ok | any
   defdelegate populate(story_id), to: Fetch, as: :populate_bookmarkers_bookmarks
 
-  @spec best_story(integer) :: [Story.t()]
+  @spec best_story(integer) :: [%{story: Story.t(), count: integer}]
   def best_story(story_id) do
     story = Story.find(story_id, :work)
 
@@ -19,11 +19,13 @@ defmodule Ao3.Analytics do
     |> Repo.all()
   end
 
-  defp best_query(story_id) do
+  defp best_query(id) do
     from(
       s in Story,
-      join: bs in subquery(bookmarked_query(story_id)),
+      preload: [:bookmarkers],
+      join: bs in subquery(bookmarked_query(id)),
       on: [id: s.id],
+      where: s.id != ^id,
       select: %{story: s, count: bs.count}
     )
   end

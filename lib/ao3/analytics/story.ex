@@ -44,7 +44,7 @@ defmodule Ao3.Analytics.Story do
 
     many_to_many(
       :bookmarkers,
-      Story,
+      User,
       join_through: "bookmarks",
       join_keys: [story_id: :id, username: :username]
     )
