@@ -26,7 +26,9 @@ defmodule Ao3.Analytics.Fetch do
 
   @spec fetch_bookmarker_bookmarks([String.t()], [String.t()]) :: [any]
   def fetch_bookmarker_bookmarks(usernames, tags) do
-    usernames
+    [username | _] = usernames
+
+    [username]
     |> Task.async_stream(&fetch_one_bookmarkers_bookmarks(&1, tags), timeout: :infinity)
     |> Enum.to_list()
   end
@@ -36,19 +38,22 @@ defmodule Ao3.Analytics.Fetch do
     user = Repo.get(User, username)
     stories = Scraper.fetch_bookmarked_story_data(username, tags)
     {:ok, user} = CreateOrUpdate.create_or_update_user_bookmarks(user, username)
-    delete_all_bookmark_joins(user.username)
 
-    stories
-    |> Enum.map(fn story_data ->
-      story = create_or_update_story_data(story_data)
-      %{username: user.username, story_id: story.id}
+    Repo.transaction(fn ->
+      delete_all_bookmark_joins(user.username)
+
+      stories
+      |> Enum.map(fn story_data ->
+        story = create_or_update_story_data(story_data)
+        %{username: user.username, story_id: story.id}
+      end)
+      |> insert_all_bookmark_joins()
     end)
-    |> insert_all_bookmark_joins()
 
     :ok
   end
 
-  @spec create_or_update_story_data(Scraper.Story.t()) :: Story.t
+  @spec create_or_update_story_data(Scraper.Story.t()) :: Story.t()
   defp create_or_update_story_data(story_data) do
     %{story_id: story_id, type: type} = story_data
 

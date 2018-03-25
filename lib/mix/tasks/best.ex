@@ -15,7 +15,7 @@ defmodule Mix.Tasks.Best do
     story_id
     |> Analytics.best_story()
     |> Enum.map(fn %{story: story, rating: rating} ->
-      {rating, story.name, story_url(story)}
+      %{rating: rating, name: story.name, bookmarks: story.bookmark_count, url: story_url(story)}
     end)
     |> IO.inspect()
   end

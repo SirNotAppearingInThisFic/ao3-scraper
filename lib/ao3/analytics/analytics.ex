@@ -36,16 +36,18 @@ defmodule Ao3.Analytics do
       join: bm in subquery(bookmarkers_query(story.id)),
       on: [username: b.username],
       where: fragment("? && ?", s.fandoms, ^story.fandoms),
+      # TODO: Handle cases with no ships
       where: fragment("? && ?", s.ships, ^story.ships),
       group_by: b.story_id,
       where: s.id != ^story.id,
       select: %{id: b.story_id, rating: count(b.id)},
       order_by: [desc: :count],
-      limit: 10
+      limit: 30
     )
   end
 
   defp bookmarkers_query(story_id) do
+    IO.inspect({"bookmarkers_query", story_id})
     from(
       b in "bookmarks",
       where: b.story_id == ^story_id,
