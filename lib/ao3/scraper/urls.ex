@@ -2,6 +2,7 @@ require IEx
 
 defmodule Ao3.Scraper.Urls do
   alias Ao3.Scraper.StoryId
+  alias Ao3.Scraper.WorkId
   alias Ao3.Scraper.UserId
   alias Ao3.Scraper.Tag
 
@@ -18,6 +19,15 @@ defmodule Ao3.Scraper.Urls do
     }
 
     "#{@base}/bookmarks?#{URI.encode_query(query)}"
+  end
+
+  @spec user_works(UserId.t(), String.t()) :: t
+  def user_works(%UserId{id: user_id}, page) do
+    "#{@base}/users/#{user_id}/works?page=#{page}"
+  end
+
+  def work(%WorkId{id: work_id}) do
+    "#{@base}/works/#{work_id}"
   end
 
   @spec story_bookmarks(StoryId.t(), String.t()) :: t

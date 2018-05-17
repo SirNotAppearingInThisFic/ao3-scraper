@@ -49,7 +49,8 @@ defmodule Ao3.Scraper.StoryPage do
 
     cond do
       !Enum.empty?(work_link) -> {:work, work_link}
-      !Enum.empty?(series_link) -> {:series, series_link}
+      # Series
+      !Enum.empty?(series_link) -> {:unknown_type, []}
       is_deleted?(html) -> {:deleted, []}
       true -> {:unknown_type, []}
     end
