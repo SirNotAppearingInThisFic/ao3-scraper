@@ -9,30 +9,33 @@ defmodule Ao3.Scraper.StoryText do
 
   @type html :: Utils.html()
 
-  @spec fetch_stories_text(UserId.t()) :: html()
-  def fetch_stories_text(user) do
+  @spec fetch_work_ids(UserId.t()) :: html()
+  def fetch_work_ids(user) do
     user
     |> Pagination.for_pages(
       10,
       &fetch_works_page/2,
       &parse_story_metadata/1
     )
-    |> Stream.concat()
-    |> Stream.map(fn %Story{story_id: story_id} ->
-      WorkId.from_int(story_id)
-    end)
-    |> Stream.map(&fetch_work/1)
-    |> Enum.to_list()
+    |> Enum.concat()
   end
 
-  defp fetch_work(%WorkId{id: work_id}) do
+  @spec fetch_work_text(WorkId.t()) :: String.t()
+  def fetch_work_text(work_id) do
     work_id
+    |> fetch_work_page()
+    |> parse_work()
+  end
+
+  @spec fetch_work_page(WorkId.t()) :: html
+  defp fetch_work_page(work) do
+    work
+    |> Urls.work()
+    |> Utils.fetch_body()
   end
 
   @spec fetch_works_page(UserId.t(), String.t()) :: html()
   defp fetch_works_page(user = %UserId{}, page) do
-    IO.puts("Fetching story metadata for: #{user.id}, page #{page}")
-
     user
     |> Urls.user_works(page)
     |> Utils.fetch_body()
@@ -57,5 +60,11 @@ defmodule Ao3.Scraper.StoryText do
         false
     end)
     |> Enum.map(fn {:ok, story} -> story end)
+  end
+
+  defp parse_work(body) do
+    body
+    |> Floki.find("#chapters .userstuff")
+    |> Floki.text()
   end
 end

@@ -25,3 +25,5 @@ ao3-*.tar
 .elixir_ls
 
 *.swp
+
+output/

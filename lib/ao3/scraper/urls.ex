@@ -27,7 +27,7 @@ defmodule Ao3.Scraper.Urls do
   end
 
   def work(%WorkId{id: work_id}) do
-    "#{@base}/works/#{work_id}"
+    "#{@base}/works/#{work_id}?view_full_work=true"
   end
 
   @spec story_bookmarks(StoryId.t(), String.t()) :: t
